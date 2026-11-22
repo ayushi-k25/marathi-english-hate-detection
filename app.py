@@ -53,7 +53,7 @@ if st.button("Analyze Text"):
 
         cleaned = clean_text(user_input)
 
-        vector = vectorizer.transform([cleaned])
+        vector = tfidf_vectorizer.transform([cleaned])
 
         prediction = model.predict(vector)[0]
 
