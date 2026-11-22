@@ -5,12 +5,18 @@ import re
 import unicodedata
 
 # Load saved model and vectorizer
+
+import os
+import joblib
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 model = joblib.load(
-    "/content/marathi_english_hate_speech_svm.pkl"
+    os.path.join(BASE_DIR, "marathi_english_hate_speech_svm.pkl")
 )
 
-vectorizer = joblib.load(
-    "/content/marathi_english_tfidf_vectorizer.pkl"
+tfidf_vectorizer = joblib.load(
+    os.path.join(BASE_DIR, "marathi_english_tfidf_vectorizer.pkl")
 )
 
 # Text preprocessing
