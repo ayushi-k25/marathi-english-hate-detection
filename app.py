@@ -63,19 +63,48 @@ def clean_text(text):
 # 5. SENTIMENT ANALYSIS
 # --------------------------------------------------
 
+
 def analyze_sentiment(text):
-    scores = sentiment_analyzer.polarity_scores(text)
+    text = text.lower()
 
-    compound = scores["compound"]
+    # Romanized Marathi-English sentiment words
+    positive_words = [
+        "chan", "chhan", "sundar", "changla",
+        "changli", "mast", "bhari", "awadte",
+        "happy", "good", "love", "excellent"
+    ]
 
-    if compound >= 0.05:
-        sentiment = "POSITIVE"
-    elif compound <= -0.05:
+    negative_words = [
+        "raag", "raga", "vait", "bekar",
+        "nafrat", "dukh", "dukhi", "radu",
+        "hate", "bad", "worst", "insult",
+        "abuse", "angry", "sad", "terrible",
+        "dislike", "disrespect", "apman"
+    ]
+
+    words = re.findall(r"\b[a-zA-Z]+\b", text)
+
+    positive_count = sum(w in positive_words for w in words)
+    negative_count = sum(w in negative_words for w in words)
+
+    # Use VADER as an additional English-language signal
+    vader_scores = sentiment_analyzer.polarity_scores(text)
+    compound = vader_scores["compound"]
+
+    if negative_count > positive_count:
         sentiment = "NEGATIVE"
+    elif positive_count > negative_count:
+        sentiment = "POSITIVE"
     else:
-        sentiment = "NEUTRAL"
+        if compound >= 0.05:
+            sentiment = "POSITIVE"
+        elif compound <= -0.05:
+            sentiment = "NEGATIVE"
+        else:
+            sentiment = "NEUTRAL"
 
-    return sentiment, scores
+    return sentiment, vader_scores
+
 
 
 # --------------------------------------------------
@@ -110,29 +139,42 @@ def extract_keywords(text):
 # Add the exact terms and aliases used by your dataset.
 # These are illustrative examples, not a complete dictionary.
 
+
 TARGET_TERMS = {
-    "RELIGION": [],
-    "GENDER": [],
-    "REGION": []
+    "GENDER": [
+        "women", "woman", "girl", "girls", "men", "boys",
+        "mulgi", "mulgi", "mulinna", "mulina",
+        "bai", "bayka", "striya", "purush"
+    ],
+
+    "RELIGION": [
+        "hindu", "muslim", "christian", "sikh",
+        "religion", "dharm", "dharma"
+    ],
+
+    "REGION": [
+        "marathi", "bihari", "punjabi",
+        "gujarati", "tamil", "bengali"
+    ]
 }
 
 
 def extract_target_groups(text):
     text = text.lower()
-    detected_groups = []
+    detected = []
 
     for category, terms in TARGET_TERMS.items():
+
         for term in terms:
-            pattern = r"\b" + re.escape(term.lower()) + r"\b"
+
+            pattern = rf"\b{re.escape(term)}\b"
 
             if re.search(pattern, text):
-                detected_groups.append(category)
+                detected.append(category)
                 break
 
-    if not detected_groups:
-        detected_groups.append("NOT IDENTIFIED")
+    return detected if detected else ["NOT IDENTIFIED"]
 
-    return detected_groups
 
 
 # --------------------------------------------------
