@@ -187,5 +187,7 @@ This result represents the model's performance on the available test split. Furt
 **Cloud Platform:** Render
 
 ---
+# Deploy link:
+https://marathi-english-hate-detection.onrender.com
 
 Developed as an academic project to explore text classification, multilingual language processing and machine learning-based content detection.
